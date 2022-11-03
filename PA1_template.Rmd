@@ -7,16 +7,82 @@ output:
 
 
 ## Loading and preprocessing the data
+### 1. Loading data
+I first load the csv data from the zip file. I consider there is only one csv file in the archive.
+```{r filename, echo=TRUE}
+filename <- unzip("activity.zip", list=TRUE)[1]
+```
+The name of the file is "*`r filename`*"
+```{r unzip, echo=TRUE}
+data <- read.csv(unz("activity.zip", filename), header=T, quote="\"", sep=",")
+str(data)
+```
+### 2. Reshape data
+1. First identify columns with NA's
+```{r Find the NA, echo=TRUE, results='hide'}
+stepsNA <- anyNA(data$steps)
+dateNA <- anyNA(data$date)
+intervalNA <- anyNA(data$interval)
+```
+- Does steps variable contain NA? `r stepsNA`  
+- Does date variable contain NA? `r dateNA`  
+- Does interval variable contain NA? `r intervalNA`  
 
+2. Delete the lines with NA in the steps column
+```{r Target and destroy NAs, echo=TRUE}
+clean_data <- data[!is.na(data$steps),]
+head(clean_data)
+str(clean_data)
+```
 
+## Histogram of the total number of steps taken each day
+1. To reduce the data and use ggplot2, we first need to load the appropriate packages
+```{r load packages, echo=TRUE}
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+```
+2. Then we can regroup the number of step by day and display the graph
+```{r Display steps per day, echo=TRUE}
+byDay <- clean_data %>% group_by(date)
+byDay <- byDay %>% summarise(total = sum(steps))
 
-## What is mean total number of steps taken per day?
+ggplot(byDay, aes(x=as.Date(date), y=total)) + 
+    geom_bar(stat='identity', fill="blue") + 
+    labs(title = "Histogram of the total number of steps taken each day", x="date", y="Daily steps") + 
+    scale_x_date(date_breaks = "1 week") +
+    theme(axis.text.x = element_text(angle=45))
 
+```
+
+## Mean and median number of steps taken each day
+We have found the total number of steps for each day in the byDay dataframe.
+The mean and median functions should give us the values for this period:
+```{r Mean and Median, echo=TRUE}
+theMean <- as.integer(mean(byDay$total))
+theMedian <- as.integer(median(byDay$total))
+```
+The mean is `r theMean` and the median is `r theMedian`.
 
 
 ## What is the average daily activity pattern?
+- Make a time series plot (i.e. type="1") of the 5-minute interval (x-axis) and the average number of steps taken, averaged accross alls days (y-axis)
+```{r Average per interval, echo=TRUE}
+meansPerInterval <- aggregate(steps ~ interval, data = data, mean)
 
+ggplot(meansPerInterval, aes(y=steps, x=interval)) + 
+    geom_line(color="blue") +
+    xlab("5-minutes interval") +
+    ylab("Average steps taken") +
+    ggtitle("Average daily activity pattern")
+```  
 
+- Which 5-minute interval, on average accross all the days in the dataset, contains the maximum number of steps?
+```{r Interval with more steps, echo=TRUE}
+maxValue <- max(meansPerInterval$steps)
+maxStepsInterval <- meansPerInterval[meansPerInterval$steps == maxValue,]$interval
+```
+The 5-minutes interval which contains on average the maximum number of steps is the **`r maxStepsInterval`**th interval with  **`r as.integer(maxValue)`** steps on average (rounded).
 
 ## Imputing missing values
 
