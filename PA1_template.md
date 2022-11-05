@@ -1,4 +1,17 @@
+---
+title: 'Reproducible Research: Peer Assessment 1'
+author: "dv8606"
+date: "2022-11-05"
+output:
+  html_document: 
+    keep_md: yes
+editor_options:
+  chunk_output_type: inline
+---
+
+
 # Reproducible Research: Peer Assessment 1
+
 
 ## Loading and preprocessing the data
 ### 1. Loading data
@@ -7,7 +20,7 @@ I first load the csv data from the zip file. I consider there is only one csv fi
 ```r
 filename <- unzip("activity.zip", list=TRUE)[1]
 ```
-The name of the file is "*activity.csv*"
+The name of the file is *activity.csv*
 
 ```r
 data <- read.csv(unz("activity.zip", filename), header=T, quote="\"", sep=",")
@@ -114,7 +127,7 @@ theMedian <- as.integer(median(byDay$total, na.rm=T))
 The **mean** is *10766* and the **median** is *10765*.
 
 ## What is the average daily activity pattern?
-- Make a time series plot (i.e. type="1") of the 5-minute interval (x-axis) and the average number of steps taken, averaged accross alls days (y-axis)
+- Make a time series plot (i.e. type="1") of the 5-minute interval (x-axis) and the average number of steps taken, averaged accross all days (y-axis)
 
 ```r
 meansPerInterval <- aggregate(steps ~ interval, data = data, mean)
